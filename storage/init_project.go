@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/alameddinc/ysc/models"
-	"log"
 	"os"
 	"path"
 	"sync"
@@ -27,6 +26,7 @@ func init() {
 	bufferValueArr = []models.Value{}
 }
 
+// ReadFileStorage reads filenames on files.txt
 func ReadFileStorage() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	go channelListener(ctx)
@@ -37,7 +37,7 @@ func ReadFileStorage() error {
 	for _, file := range files {
 		fileMap[file] = true
 		wgReadFiles.Add(1)
-		go ReadStorageFile(file)
+		go ReadFile(file)
 	}
 	wgReadFiles.Wait()
 	cancel()
@@ -45,12 +45,12 @@ func ReadFileStorage() error {
 	return nil
 }
 
-func ReadStorageFile(filename string) error {
+// ReadFile read file and fetch values
+func ReadFile(filename string) error {
 	defer wgReadFiles.Done()
 	var file, err = os.OpenFile(path.Join(filesPath, filename), os.O_RDONLY, 0777)
 	if err != nil {
-		log.Fatalln(err)
-		return err
+		return nil
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
@@ -62,6 +62,7 @@ func ReadStorageFile(filename string) error {
 
 }
 
+// channelListener works on Goroutines for fetch all values
 func channelListener(ctx context.Context) {
 	wgReadItems.Add(1)
 	defer wgReadItems.Done()
@@ -81,6 +82,7 @@ func channelListener(ctx context.Context) {
 	}
 }
 
+// fetchFileList works for fetch all filenames
 func fetchFileList() ([]string, error) {
 	fileList := []string{}
 	var file, err = os.OpenFile(path.Join(filesPath, fileStorename), os.O_RDONLY, 0777)

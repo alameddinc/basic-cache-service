@@ -19,6 +19,7 @@ func init() {
 	NextTimestamp = time.Now().Unix()
 }
 
+// CreateValue creates or fetches Value
 func CreateValue(key string, content string) (*Value, error) {
 	v, err := FetchValue(key)
 	if err != nil {
@@ -27,6 +28,7 @@ func CreateValue(key string, content string) (*Value, error) {
 	return v.Set(content)
 }
 
+// FetchValue fetches Value
 func FetchValue(key string) (*Value, error) {
 	if v, ok := CachedValues[key]; ok {
 		return v, nil
@@ -34,6 +36,7 @@ func FetchValue(key string) (*Value, error) {
 	return nil, errors.New("Not Found")
 }
 
+// Set Value
 func (v *Value) Set(content string) (*Value, error) {
 	// Cache on File
 	if v.FilenameStamp == "" {
@@ -52,16 +55,21 @@ func (v *Value) Set(content string) (*Value, error) {
 	return v, nil
 }
 
+// Get Value
 func (v Value) Get() string {
 	return v.Content
 }
 
+// Delete Value
 func (v *Value) Delete() error {
 	//delete on File
 	if _, ok := ValueHistories[v.FilenameStamp]; !ok {
 		ValueHistories[v.FilenameStamp] = map[string]*ValueHistory{}
 	}
-	ValueHistories[v.FilenameStamp][v.Key].Op = "d"
+	ValueHistories[v.FilenameStamp][v.Key] = &ValueHistory{
+		Value: nil,
+		Op:    "d",
+	}
 	// delete on Cache
 	delete(CachedValues, v.Key)
 	return errors.New("not found")

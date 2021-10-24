@@ -20,8 +20,8 @@ var wgWriteAll sync.WaitGroup
 
 func Sync(debug bool) {
 	for true {
-		filesPath := path.Join(filesPath, fileStorename)
-		files, err := os.OpenFile(filesPath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
+		filesFullPath := path.Join(filesPath, fileStorename)
+		files, err := os.OpenFile(filesFullPath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
 		if err != nil {
 			return
 		}
@@ -35,21 +35,27 @@ func Sync(debug bool) {
 		currentFiles := map[string]bool{}
 		for scanner.Scan() {
 			line := scanner.Text()
-			if _, ok := currentFiles[line]; !ok {
+			_, err := os.Stat(path.Join(filesPath, line))
+			if _, ok := currentFiles[line]; !ok && err == nil {
 				currentFiles[line] = true
 			}
 		}
 		for fn, works := range models.ValueHistories {
+			fmt.Println(models.ValueHistories)
 			if _, ok := currentFiles[fn]; !ok {
-				writer.WriteString(fn + "\n")
+				currentFiles[fn] = true
 			}
 			wgWriteAll.Add(1)
 			go SyncToFile(works, fn)
 			delete(models.ValueHistories, fn)
 		}
+		os.Truncate(path.Join(filesPath, fileStorename), 0)
+		for fn, _ := range currentFiles {
+			writer.WriteString(fn + "\n")
+		}
 		wgWriteAll.Wait()
 		closeWriter()
-		if debug{
+		if debug {
 			return
 		}
 	}
@@ -83,6 +89,7 @@ func SyncToFile(works map[string]*models.ValueHistory, fn string) {
 
 }
 
+// syncNewValues works for availrable values on ValueHistories
 func aviableRows(works map[string]*models.ValueHistory, file *os.File, writer *bufio.Writer) int {
 	lineCount := 0
 	scanner := bufio.NewScanner(file)
@@ -114,6 +121,7 @@ func createNewWriter(file *os.File) (*bufio.Writer, func()) {
 	}
 }
 
+// syncNewValues works for new values on ValueHistories
 func syncNewValues(works map[string]*models.ValueHistory, writer *bufio.Writer) int {
 	lineCount := 0
 	for _, v := range works {
@@ -134,6 +142,7 @@ func syncNewValues(works map[string]*models.ValueHistory, writer *bufio.Writer) 
 	return lineCount
 }
 
+// removeAndMove delete newFile with currentFile when lineCount is zero
 func removeAndMove(c string, n string, lineCount int) {
 	os.Remove(c)
 	if lineCount == 0 {

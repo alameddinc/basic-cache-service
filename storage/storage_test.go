@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestReadStorageFile(t *testing.T) {
+func TestReadFile(t *testing.T) {
 	testResults := map[string]string{
 		"test1": "1",
 		"test2": "2",
@@ -39,7 +39,7 @@ func TestReadStorageFile(t *testing.T) {
 			}
 		}
 	}()
-	ReadStorageFile("mock.txt")
+	ReadFile("mock.txt")
 	t.Log("Success")
 	return
 }
@@ -55,10 +55,10 @@ func TestSync(t *testing.T) {
 	models.ValueHistories[testSyncFilename] = map[string]*models.ValueHistory{}
 	models.ValueHistories[testSyncFilename][testValueHistory.Value.Key] = &testValueHistory
 	Sync(true)
-	if _, err := os.Stat(path.Join(filesPath, testSyncFilename)); os.IsNotExist(err){
+	if _, err := os.Stat(path.Join(filesPath, testSyncFilename)); os.IsNotExist(err) {
 		t.Fatal("Can not Created file")
 	}
-	if err := os.Remove(path.Join(filesPath, testSyncFilename)); err != nil{
+	if err := os.Remove(path.Join(filesPath, testSyncFilename)); err != nil {
 		t.Fatal("Can not Deleted File")
 	}
 	t.Log("Success")
