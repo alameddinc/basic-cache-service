@@ -31,4 +31,5 @@ func storageRoutes() {
 	subRouter := createSubRouter("storage")
 	subRouter.HandleFunc("/set", PostSetValue).Methods("POST")
 	subRouter.HandleFunc("/get/{key}", GetValueContent).Methods("GET")
+	subRouter.HandleFunc("/flush", GetFlush).Methods("GET")
 }

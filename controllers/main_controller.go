@@ -36,3 +36,10 @@ func GetValueContent(w http.ResponseWriter, r *http.Request) {
 	}
 	jsonFailed(w, errors.New("Not Found"))
 }
+
+func GetFlush(w http.ResponseWriter, r *http.Request) {
+	for _, v := range models.CachedValues {
+		v.Delete()
+	}
+	jsonSuccessfull(w, map[string]interface{}{"message": "OK"})
+}
