@@ -11,6 +11,6 @@ func main() {
 		log.Fatalln(err)
 		return
 	}
-	go storage.Sync()
+	go storage.Sync(false)
 	routes.Handler()
 }

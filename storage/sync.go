@@ -12,13 +12,13 @@ import (
 	"time"
 )
 
-const (
+var (
 	SYNC_LIFECYCLE = 10 * time.Second
 )
 
 var wgWriteAll sync.WaitGroup
 
-func Sync() {
+func Sync(debug bool) {
 	for true {
 		filesPath := path.Join(filesPath, fileStorename)
 		files, err := os.OpenFile(filesPath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0777)
@@ -49,6 +49,9 @@ func Sync() {
 		}
 		wgWriteAll.Wait()
 		closeWriter()
+		if debug{
+			return
+		}
 	}
 }
 

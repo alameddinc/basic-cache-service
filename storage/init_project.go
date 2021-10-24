@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/alameddinc/ysc/models"
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -36,7 +37,7 @@ func ReadFileStorage() error {
 	for _, file := range files {
 		fileMap[file] = true
 		wgReadFiles.Add(1)
-		go readStorageFile(file)
+		go ReadStorageFile(file)
 	}
 	wgReadFiles.Wait()
 	cancel()
@@ -44,10 +45,11 @@ func ReadFileStorage() error {
 	return nil
 }
 
-func readStorageFile(filename string) error {
+func ReadStorageFile(filename string) error {
 	defer wgReadFiles.Done()
 	var file, err = os.OpenFile(path.Join(filesPath, filename), os.O_RDONLY, 0777)
 	if err != nil {
+		log.Fatalln(err)
 		return err
 	}
 	defer file.Close()
@@ -70,7 +72,6 @@ func channelListener(ctx context.Context) {
 			if err := json.Unmarshal([]byte(rawVal.RawContent), &tmpCore); err != nil {
 				continue
 			}
-
 			models.CachedValues[tmpCore.Key] = &models.Value{CoreValue: tmpCore, FilenameStamp: rawVal.Filename}
 		case <-ctx.Done():
 			return
