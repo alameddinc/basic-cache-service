@@ -1,7 +1,7 @@
 ## What is It?
 It is a simple caching system written in golang. This saves the new values to new storage files with an interval time loop and if the values need to be changed or deleted, it performs operations on the recorded file with the multi-process feature. Every storagefile have multi value and when storage file have never value, It will be deleted.
 
-## How is Works?
+## How It Runs?
 With Docker-compose:
 `docker-compose up --build -d`
 
